@@ -25,10 +25,11 @@ public class Searcher {
      *  @return A postings list representing the result of the query.
      */
     public PostingsList search( Query query, QueryType queryType, RankingType rankingType ) { 
+      return index.getPostings(query.queryterm.get(0).term);
 
-	//
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+      //
+      //  REPLACE THE STATEMENT BELOW WITH YOUR CODE
+      //
+
     }
 }

@@ -17,6 +17,7 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
     public double score = 0;
+    public ArrayList<Integer> positions = new ArrayList<Integer>();
 
     /**
      *  PostingsEntries are compared by their score (only relevant
@@ -26,13 +27,17 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
      *  descending order.
      */
     public int compareTo( PostingsEntry other ) {
-	return Double.compare( other.score, score );
+      return Double.compare( other.score, score );
     }
 
     
     //
     // YOUR CODE HERE
     //
+    public PostingsEntry(int docID, int offset){
+      this.docID = docID;
+      this.positions.add(offset);
+    }
 }
 
     

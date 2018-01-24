@@ -8,6 +8,7 @@
 package ir;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class PostingsList {
     
@@ -17,17 +18,32 @@ public class PostingsList {
 
     /** Number of postings in this list. */
     public int size() {
-	return list.size();
+      return list.size();
     }
 
     /** Returns the ith posting. */
     public PostingsEntry get( int i ) {
-	return list.get( i );
+      return list.get( i );
     }
 
     // 
     //  YOUR CODE HERE
     //
+    public PostingsList(PostingsEntry entry){
+      assert size() == 0;
+      list.add(entry);
+    }
+
+    public void add(int docID, int offset){
+      
+      for(int i=0;i<size();++i){
+        if(get(i).docID == docID){
+          get(i).positions.add(offset);
+          return;
+        }
+      }
+      list.add(new PostingsEntry(docID,offset));
+    }
 }
 	
 
