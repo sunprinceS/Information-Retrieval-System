@@ -29,20 +29,29 @@ public class PostingsList {
     // 
     //  YOUR CODE HERE
     //
-    public PostingsList(PostingsEntry entry){
-      assert size() == 0;
+    public PostingsList(){
+      //used for intersection and phrase
+      //System.out.println("Hihi");
+    }
+    //public PostingsList(PostingsEntry entry){
+      //assert size() == 0;
+      //list.add(entry);
+    //}
+
+    public void add(PostingsEntry entry){
       list.add(entry);
     }
 
     public void add(int docID, int offset){
-      
-      for(int i=0;i<size();++i){
-        if(get(i).docID == docID){
-          get(i).positions.add(offset);
-          return;
-        }
+      // Indexing the file according to docID, then according to offset
+      assert size() != 0;
+      PostingsEntry lastEntry = list.get(list.size()-1);
+      if(lastEntry.docID != docID){
+        list.add(new PostingsEntry(docID,offset));
       }
-      list.add(new PostingsEntry(docID,offset));
+      else{
+        lastEntry.positions.add(offset);
+      }
     }
 }
 	
