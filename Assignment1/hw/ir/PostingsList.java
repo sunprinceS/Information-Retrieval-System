@@ -10,7 +10,7 @@ package ir;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class PostingsList {
+public class PostingsList implements Comparable<PostingsList>{
     
     /** The postings list */
     private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
@@ -24,6 +24,10 @@ public class PostingsList {
     /** Returns the ith posting. */
     public PostingsEntry get( int i ) {
       return list.get( i );
+    }
+
+    public int compareTo(PostingsList rhs){
+        return this.size() - rhs.size();
     }
 
     // 
