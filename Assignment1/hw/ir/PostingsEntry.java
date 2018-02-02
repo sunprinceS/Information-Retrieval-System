@@ -43,9 +43,6 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
       return positions.size();
     }
     
-    //
-    // YOUR CODE HERE
-    //
     public PostingsEntry(String s){
       String[] offsets = s.split(" ");
       this.docID = Integer.parseInt(offsets[0]);

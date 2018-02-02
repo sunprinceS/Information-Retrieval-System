@@ -129,7 +129,7 @@ public class PersistentHashedIndex implements Index {
         dataFile.seek(ptr);
         byte[] w = new byte[word.length()];
         dataFile.readFully(w);
-        System.out.println("checkWord " + word + " (read " + (new String(w)) + " )");
+        //System.out.println("checkWord " + word + " (read " + (new String(w)) + " )");
         return (word.equals(new String(w)));
       }
       catch ( IOException e ) {
@@ -244,37 +244,34 @@ public class PersistentHashedIndex implements Index {
 
             // Write the dictionary and the postings list
             int cnt = 0;
+            //int max_val = 0;//940
             boolean[] b_occupied = new boolean[(int)TABLESIZE];//??????
             for(Map.Entry<String,PostingsList> entry: index.entrySet()){
+              //int single_round = 0;
               long h = myHash(entry.getKey());
               long old_h =h;
+
               while(b_occupied[(int)h]){
                 ++collisions;
+                //++single_round;
                 ++h;
                 if(h == TABLESIZE){
                   h = 0L;
                 }
               }
+              //if(single_round > max_val){
+                //max_val = single_round;
+              //}
             
               ++cnt;
-              if(cnt%10000 == 0) System.err.println("Saved "+cnt + " indexes, collisions :" + collisions);
+              if(cnt%10000 == 0) System.err.println("Saved " +cnt+ " indexes");
               b_occupied[(int)h] = true;
 
               int num_bytes = writeData(entry.getKey(),entry.getValue().toStr(),free);
-              if(entry.getKey().equals("or") || entry.getKey().equals("are") || entry.getKey().equals("to")){
-                System.out.println("(WriteEntry) " + entry.getKey() + " " + num_bytes + " bytes and dataPtr " + free + " at entry " + h);
-              }
               writeEntry(new Entry(free,num_bytes),h*(ENTRYSIZE));
-              if(h == 356109 || h == 356271){
-                System.out.println(entry.getKey() + " at " + h);
-              }
-              if(entry.getKey().equals("or") || entry.getKey().equals("are") || entry.getKey().equals("to")){
-                Entry lala = readEntry(h*(ENTRYSIZE));
-                System.out.println("(Read Immediately) " + lala.size_read +" bytes, dataPtr is " +lala.ptr + " at entry " + h);
-              }
-              
               free += (num_bytes+entry.getKey().length());
           }
+          //System.out.println("Largest offset " + max_val);
         }
         catch ( IOException e ) {
             e.printStackTrace();
@@ -294,7 +291,7 @@ public class PersistentHashedIndex implements Index {
       long hash_v = myHash(token);
       int cnt = 0;
       Entry entry = readEntry(hash_v * ENTRYSIZE);
-      while(!checkWord(entry.ptr,token) && cnt < TABLESIZE){
+      while(!checkWord(entry.ptr,token) && cnt < 1000){ //1000 is got via running once :p
         ++hash_v ;
         ++cnt;
         if(hash_v == TABLESIZE){
@@ -302,11 +299,12 @@ public class PersistentHashedIndex implements Index {
         }
         entry = readEntry(hash_v * ENTRYSIZE);
       }
-      if(token.equals("or")|| token.equals("are") || token.equals("to")){
-          System.out.println("(Read) "+ token + " : " +entry.size_read +" bytes, dataPtr is " +entry.ptr + " at entry " + hash_v);
-        }
-      return (new PostingsList(readData(entry.ptr + token.length(),entry.size_read)));
-      //return index.get(token);
+      if(checkWord(entry.ptr,token)){
+        return (new PostingsList(readData(entry.ptr + token.length(),entry.size_read)));
+      }
+      else{
+        return null;
+      }
       
     }
     
@@ -345,7 +343,6 @@ public class PersistentHashedIndex implements Index {
 
       for(int i=0;i<word.length();i++){
         ret = ((ret << 5) + ret) + word.charAt(i);
-        //ret = 31 * ret + word.charAt(i);
       }
       ret %= TABLESIZE;
       if(ret < 0){

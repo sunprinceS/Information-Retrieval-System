@@ -30,9 +30,6 @@ public class PostingsList implements Comparable<PostingsList>{
         return this.size() - rhs.size();
     }
 
-    // 
-    //  YOUR CODE HERE
-    //
     public PostingsList(){
       //used for intersection and phrase
       //System.out.println("Hihi");

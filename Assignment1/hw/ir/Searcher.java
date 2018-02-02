@@ -44,21 +44,25 @@ public class Searcher {
         PostingsList pl1 = index.getPostings(query.queryterm.get(0).term);
         PostingsList pl2 = index.getPostings(query.queryterm.get(1).term);
         if(pl1 == null || pl2 == null){
-          return null;
+          return (new PostingsList());
         }
 
         PostingsList ret = intersect_two(pl1,pl2,bNear);
         for(int i=2;i<query.queryterm.size();++i){
           PostingsList pl = index.getPostings(query.queryterm.get(i).term);
           if(pl == null){
-            return null;
+            return (new PostingsList()) ;
           }
           ret = intersect_two(ret,pl,bNear);
         }
         return ret;
       }
       else{
-        return index.getPostings(query.queryterm.get(0).term);
+        PostingsList pl = index.getPostings(query.queryterm.get(0).term);
+        if(pl == null){
+          return (new PostingsList());
+        }
+        return pl;
       }
     }
     private PostingsEntry positionIntersect_two(PostingsEntry pe1,PostingsEntry pe2){
