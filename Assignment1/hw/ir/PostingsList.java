@@ -37,6 +37,21 @@ public class PostingsList implements Comparable<PostingsList>{
       //used for intersection and phrase
       //System.out.println("Hihi");
     }
+
+    public PostingsList(String s){
+      String[] pes = s.split("\n");
+      for(String pe : pes){
+        this.list.add(new PostingsEntry(pe));
+      }
+    }
+
+    public String toStr(){
+      String ret = "";
+      for(PostingsEntry pe:this.list){
+        ret = ret + pe.toStr() + "\n";
+      }
+      return ret.substring(0,ret.length()-1);
+    }
     //public PostingsList(PostingsEntry entry){
       //assert size() == 0;
       //list.add(entry);

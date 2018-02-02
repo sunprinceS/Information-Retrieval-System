@@ -30,6 +30,14 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     public int compareTo( PostingsEntry other ) {
       return Double.compare( other.score, score );
     }
+
+    String toStr(){
+      String ret = Integer.toString(this.docID);
+      for(int offset: this.positions){
+        ret = ret + " " + Integer.toString(offset);
+      }
+      return ret;
+    }
     
     public int size(){
       return positions.size();
@@ -38,6 +46,13 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     //
     // YOUR CODE HERE
     //
+    public PostingsEntry(String s){
+      String[] offsets = s.split(" ");
+      this.docID = Integer.parseInt(offsets[0]);
+      for(int i=1;i<offsets.length;++i){
+        this.positions.add(Integer.parseInt(offsets[i]));
+      }
+    }
     public PostingsEntry(int docID){
       this.docID = docID;
     }

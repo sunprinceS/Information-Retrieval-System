@@ -1,5 +1,5 @@
 /*  
- *   This file is part of the computer assignment for the
+ i   This file is part of the computer assignment for the
  *   Information Retrieval course at KTH.
  * 
  *   Johan Boye, KTH, 2018
@@ -31,7 +31,7 @@ public class PersistentHashedIndex implements Index {
     /** The dictionary file name */
     public static final String DICTIONARY_FNAME = "dictionary";
 
-    /** The dictionary file name */
+    /** The data file name */
     public static final String DATA_FNAME = "data";
 
     /** The terms file name */
@@ -43,6 +43,8 @@ public class PersistentHashedIndex implements Index {
     /** The dictionary hash table on disk can fit this many entries. */
     public static final long TABLESIZE = 611953L;  // 50,000th prime number
 
+    public static final long ENTRYSIZE = (Long.SIZE*2)/8;//!!!!! can not use int + long
+
     /** The dictionary hash table is stored in this file. */
     RandomAccessFile dictionaryFile;
 
@@ -53,6 +55,7 @@ public class PersistentHashedIndex implements Index {
     long free = 0L;
 
     /** The cache as a main-memory hash map. */
+    // only used in building index in the beginning
     HashMap<String,PostingsList> index = new HashMap<String,PostingsList>();
 
 
@@ -62,9 +65,13 @@ public class PersistentHashedIndex implements Index {
      *   A helper class representing one entry in the dictionary hashtable.
      */ 
     public class Entry {
-	//
-	//  YOUR CODE HERE
-	//
+      long ptr;
+      int size_read;
+
+      public Entry(long ptr, int size_read){
+        this.ptr = ptr;
+        this.size_read = size_read;
+      }
     }
 
 
@@ -98,10 +105,12 @@ public class PersistentHashedIndex implements Index {
      *
      *  @return The number of bytes written.
      */ 
-    int writeData( String dataString, long ptr ) {
+    int writeData(String word, String dataString, long ptr ) {
         try {
             dataFile.seek( ptr ); 
+            byte[] k = word.getBytes();
             byte[] data = dataString.getBytes();
+            dataFile.write(k);
             dataFile.write( data );
             return data.length;
         }
@@ -115,6 +124,19 @@ public class PersistentHashedIndex implements Index {
     /**
      *  Reads data from the data file
      */ 
+    boolean checkWord(long ptr, String word){
+      try{
+        dataFile.seek(ptr);
+        byte[] w = new byte[word.length()];
+        dataFile.readFully(w);
+        System.out.println("checkWord " + word + " (read " + (new String(w)) + " )");
+        return (word.equals(new String(w)));
+      }
+      catch ( IOException e ) {
+          e.printStackTrace();
+          return false;
+      }
+    }
     String readData( long ptr, int size ) {
         try {
             dataFile.seek( ptr );
@@ -139,10 +161,16 @@ public class PersistentHashedIndex implements Index {
      *  @param entry The key of this entry is assumed to have a fixed length
      *  @param ptr   The place in the dictionary file to store the entry
      */
-    void writeEntry( Entry entry, long ptr ) {
-	//
-	//  YOUR CODE HERE
-	//
+    void writeEntry( Entry entry, long ptr) {
+      try{
+        dictionaryFile.seek(ptr);
+        dictionaryFile.writeLong(entry.size_read);
+        dictionaryFile.writeLong(entry.ptr);
+
+      }
+      catch(IOException e){
+        e.printStackTrace();
+      }
     }
 
     /**
@@ -151,10 +179,18 @@ public class PersistentHashedIndex implements Index {
      *  @param ptr The place in the dictionary file where to start reading.
      */
     Entry readEntry( long ptr ) {   
-	//
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE 
-	//
-	return null;
+      long data_ptr = 0L;
+      int size_read = 0;
+      try{
+        dictionaryFile.seek(ptr);
+        size_read = (int)dictionaryFile.readLong();
+        data_ptr = dictionaryFile.readLong();
+
+      }
+      catch (IOException e){
+          e.printStackTrace();
+      }
+      return (new Entry(data_ptr,size_read));
     }
 
 
@@ -207,10 +243,38 @@ public class PersistentHashedIndex implements Index {
             writeDocInfo();
 
             // Write the dictionary and the postings list
-           
-	    // 
-	    //  YOUR CODE HERE
-	    //
+            int cnt = 0;
+            boolean[] b_occupied = new boolean[(int)TABLESIZE];//??????
+            for(Map.Entry<String,PostingsList> entry: index.entrySet()){
+              long h = myHash(entry.getKey());
+              long old_h =h;
+              while(b_occupied[(int)h]){
+                ++collisions;
+                ++h;
+                if(h == TABLESIZE){
+                  h = 0L;
+                }
+              }
+            
+              ++cnt;
+              if(cnt%10000 == 0) System.err.println("Saved "+cnt + " indexes, collisions :" + collisions);
+              b_occupied[(int)h] = true;
+
+              int num_bytes = writeData(entry.getKey(),entry.getValue().toStr(),free);
+              if(entry.getKey().equals("or") || entry.getKey().equals("are") || entry.getKey().equals("to")){
+                System.out.println("(WriteEntry) " + entry.getKey() + " " + num_bytes + " bytes and dataPtr " + free + " at entry " + h);
+              }
+              writeEntry(new Entry(free,num_bytes),h*(ENTRYSIZE));
+              if(h == 356109 || h == 356271){
+                System.out.println(entry.getKey() + " at " + h);
+              }
+              if(entry.getKey().equals("or") || entry.getKey().equals("are") || entry.getKey().equals("to")){
+                Entry lala = readEntry(h*(ENTRYSIZE));
+                System.out.println("(Read Immediately) " + lala.size_read +" bytes, dataPtr is " +lala.ptr + " at entry " + h);
+              }
+              
+              free += (num_bytes+entry.getKey().length());
+          }
         }
         catch ( IOException e ) {
             e.printStackTrace();
@@ -227,10 +291,23 @@ public class PersistentHashedIndex implements Index {
      *  if the term is not in the index.
      */
     public PostingsList getPostings( String token ) {
-	//
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+      long hash_v = myHash(token);
+      int cnt = 0;
+      Entry entry = readEntry(hash_v * ENTRYSIZE);
+      while(!checkWord(entry.ptr,token) && cnt < TABLESIZE){
+        ++hash_v ;
+        ++cnt;
+        if(hash_v == TABLESIZE){
+          hash_v = 0L;
+        }
+        entry = readEntry(hash_v * ENTRYSIZE);
+      }
+      if(token.equals("or")|| token.equals("are") || token.equals("to")){
+          System.out.println("(Read) "+ token + " : " +entry.size_read +" bytes, dataPtr is " +entry.ptr + " at entry " + hash_v);
+        }
+      return (new PostingsList(readData(entry.ptr + token.length(),entry.size_read)));
+      //return index.get(token);
+      
     }
     
 
@@ -238,9 +315,14 @@ public class PersistentHashedIndex implements Index {
      *  Inserts this token in the main-memory hashtable.
      */
     public void insert( String token, int docID, int offset ) {
-	//
-	//  YOUR CODE HERE
-	//
+      if(index.get(token) != null){
+        (index.get(token)).add(docID,offset);
+      }
+      else{
+        PostingsList newPL = new PostingsList();
+        newPL.add(new PostingsEntry(docID,offset));
+        index.put(token,newPL);
+      }
     }
 
 
@@ -249,9 +331,42 @@ public class PersistentHashedIndex implements Index {
      */
     public void cleanup() {
         System.err.println( index.keySet().size() + " unique words" );
-        System.err.print( "Writing index to disk..." );
+        System.err.println( "Writing index to disk..." );
+        long startTime = System.currentTimeMillis();
         writeIndex();
-        System.err.println( "done!" );
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.err.println( "done in " + elapsedTime/1000 + " seconds!");
      }
+
+    /*Hash function*/
+    private long myHash(String word){
+      //long ret = 1125899906842597L;
+      long ret = 5381;
+
+      for(int i=0;i<word.length();i++){
+        ret = ((ret << 5) + ret) + word.charAt(i);
+        //ret = 31 * ret + word.charAt(i);
+      }
+      ret %= TABLESIZE;
+      if(ret < 0){
+        ret += TABLESIZE;
+      }
+
+      return ret;
+
+    }
+
+    //private long myHash2(String word){
+      //long ret = 0;
+
+      //for(int i=0;i<word.length();i++){
+        //ret = Character.getNumericValue(word.charAt(i)  + ret*65599;
+      //}
+
+      //if(ret < 0){
+        //ret += Long.MAX_VALUE;
+      //}
+      //return ret;
+    //}
 
 }
