@@ -249,7 +249,6 @@ public class PersistentHashedIndex implements Index {
             for(Map.Entry<String,PostingsList> entry: index.entrySet()){
               //int single_round = 0;
               long h = myHash(entry.getKey());
-              long old_h =h;
 
               while(b_occupied[(int)h]){
                 ++collisions;
