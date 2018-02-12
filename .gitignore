@@ -31,6 +31,8 @@ hs_err_pid*
 # Generated using ignr.py - github.com/Antrikshy/ignr.py
 davisWiki/
 davisWiki_small/
+davisWiki_medium/
 guardian/
 pdfbox/
 *.pdf
+index/
