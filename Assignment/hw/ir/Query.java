@@ -24,12 +24,21 @@ public class Query {
      *  Help class to represent one query term, with its associated weight. 
      */
     class QueryTerm {
-	String term;
-	double weight;
-	QueryTerm( String t, double w ) {
-	    term = t;
-	    weight = w;
-	}
+      String term;
+      double weight;
+      QueryTerm( String t, double w ) {
+          term = t;
+          weight = w;
+      } 
+      public void addWeight(double inc){
+        weight += inc;
+      }
+      public void normalize(double d){
+        weight /= d;
+      }
+      public void multiply(double d){
+        weight *= d;
+      }
     }
 
     /** 
@@ -64,10 +73,29 @@ public class Query {
      *  Creates a new Query from a string of words
      */
     public Query( String queryString  ) {
-	StringTokenizer tok = new StringTokenizer( queryString );
-	while ( tok.hasMoreTokens() ) {
-	    queryterm.add( new QueryTerm(tok.nextToken(), 1.0) );
-	}    
+      StringTokenizer tok = new StringTokenizer( queryString );
+      while ( tok.hasMoreTokens() ) {
+        String token = tok.nextToken();
+        int tokenIdx = findToken(token);
+        //System.out.println(tokenIdx);
+        if(tokenIdx != -1){
+          queryterm.get(tokenIdx).addWeight(1.0);
+        }
+        else{
+          queryterm.add( new QueryTerm(token, 1.0) );
+        }
+      }
+      
+    }
+
+    private int findToken(String term){
+      //System.out.println(term);
+      for(int i=0;i<queryterm.size();++i){
+        if(queryterm.get(i).term.equals(term)){
+          return i;
+        }
+      }
+      return -1;
     }
     
     
@@ -75,7 +103,13 @@ public class Query {
      *  Returns the number of terms
      */
     public int size() {
-	return queryterm.size();
+      return queryterm.size();
+    }
+
+    public void normalize(){
+      for(int i=0;i<queryterm.size();++i){
+        queryterm.get(i).normalize(length());
+      }
     }
     
     
@@ -83,11 +117,11 @@ public class Query {
      *  Returns the Manhattan query length
      */
     public double length() {
-	double len = 0;
-	for ( QueryTerm t : queryterm ) {
-	    len += t.weight; 
-	}
-	return len;
+      double len = 0;
+      for ( QueryTerm t : queryterm ) {
+          len += t.weight; 
+      }
+      return len;
     }
     
     
@@ -95,11 +129,11 @@ public class Query {
      *  Returns a copy of the Query
      */
     public Query copy() {
-	Query queryCopy = new Query();
-	for ( QueryTerm t : queryterm ) {
-	    queryCopy.queryterm.add( new QueryTerm(t.term, t.weight) );
-	}
-	return queryCopy;
+      Query queryCopy = new Query();
+      for ( QueryTerm t : queryterm ) {
+          queryCopy.queryterm.add( new QueryTerm(t.term, t.weight) );
+      }
+      return queryCopy;
     }
     
     

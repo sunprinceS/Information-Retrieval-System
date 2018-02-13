@@ -17,6 +17,7 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
     public double score = 0;
+    //public double norm = 0;
     public ArrayList<Integer> positions = new ArrayList<Integer>();
 
 
@@ -53,6 +54,17 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     public PostingsEntry(int docID){
       this.docID = docID;
     }
+    public PostingsEntry(PostingsEntry rhs){
+      this.docID = rhs.docID;
+      this.score = rhs.score;
+      //this.norm = rhs.norm;
+      this.positions = rhs.positions;
+    }
+    public PostingsEntry(int docID,double s){
+      this.docID = docID;
+      this.score = s;
+      //this.norm = nm;
+    }
     public int get(int i){
       return this.positions.get(i);
     }
@@ -66,5 +78,3 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
       this.positions.add(offset);
     }
 }
-
-    

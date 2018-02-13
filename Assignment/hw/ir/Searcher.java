@@ -27,6 +27,7 @@ public class Searcher {
      *  @return A postings list representing the result of the query.
      */
     public PostingsList search( Query query, QueryType queryType, RankingType rankingType ) { 
+      System.out.println("Total number of document: " + index.docLengths.size());
       //  REPLACE THE STATEMENT BELOW WITH YOUR CODE
       if(queryType == QueryType.INTERSECTION_QUERY){
         return intersect(query,false);
@@ -35,9 +36,37 @@ public class Searcher {
         return intersect(query,true);
       }
       else{
-        return null;
+        Query q = query.copy();
+        calDocNorm();
+        PostingsList ret = union(q);
+        ret.rankSort();
+        return ret;
       }
     }
+
+    private PostingsList union(Query query){
+      int curQuery = 0 ;
+      PostingsList ret = index.getPostings(query.queryterm.get(curQuery).term);
+      while(ret == null && curQuery < query.queryterm.size()-1){
+        ret = index.getPostings(query.queryterm.get(++curQuery).term);
+      }
+      if(ret != null){
+        ret = reduce(ret,query.queryterm.get(curQuery).weight * Math.log((double)index.docLengths.size()/ret.size()));
+        //ret = reduce(ret,query.queryterm.get(curQuery).weight);
+        for(int i=curQuery+1;i<query.queryterm.size();++i){
+          PostingsList merged = index.getPostings(query.queryterm.get(i).term);
+          if(merged != null){
+            ret = merge(ret,merged,query.queryterm.get(i).weight * Math.log((double)index.docLengths.size()/merged.size()));
+            //ret = merge(ret,merged,query.queryterm.get(i).weight);
+          }
+        }
+        return ret;
+      }
+      else{
+        return (new PostingsList()) ;
+      }
+    }
+
     private PostingsList intersect(Query query,Boolean bNear){
       //TODO: start from the least element postingList
       if(query.queryterm.size() > 1){
@@ -89,6 +118,15 @@ public class Searcher {
       return ret;
 
     }
+    private PostingsList reduce(PostingsList pl, double w){
+      PostingsList ret = new PostingsList();
+      double s;
+      for(int i=0;i<pl.size();++i){
+        s = tfidf(pl.get(i).size(),pl.size(),index.docLengths.get(pl.get(i).docID),index.docNames.get(pl.get(i).docID),pl.get(i).docID);
+        ret.add(new PostingsEntry(pl.get(i).docID,w * s));
+      }
+      return ret;
+    }
     private PostingsList intersect_two(PostingsList pl1, PostingsList pl2, Boolean bPosition){
       //use QueryTerm rather than String for search according to weight in the
       //future
@@ -120,5 +158,42 @@ public class Searcher {
         }
       }
       return ret;
+    }
+    private PostingsList merge(PostingsList basePl,PostingsList mergedPl,double w){
+      //basePl must be reduced
+      PostingsList ret = new PostingsList();
+      int it1 = 0;
+      int it2 = 0;
+      while(it1 < basePl.size() && it2 < mergedPl.size()){
+        if(basePl.get(it1).docID == mergedPl.get(it2).docID){
+          double s = tfidf(mergedPl.get(it2).size(),mergedPl.size(),index.docLengths.get(basePl.get(it1).docID),index.docNames.get(mergedPl.get(it2).docID),mergedPl.get(it2).docID);
+          ret.add(new PostingsEntry(basePl.get(it1).docID,basePl.get(it1).score + s*w));
+          ++it1;
+          ++it2;
+        }
+        else if(basePl.get(it1).docID > mergedPl.get(it2).docID){ //add it2
+          double s = tfidf(mergedPl.get(it2).size(),mergedPl.size(),index.docLengths.get(mergedPl.get(it2).docID),index.docNames.get(mergedPl.get(it2).docID),mergedPl.get(it2).docID);
+          ret.add(new PostingsEntry(mergedPl.get(it2).docID,s*w));
+          ++it2;
+        }
+        else{ //add it1
+          ret.add(new PostingsEntry(basePl.get(it1)));
+          ++it1;
+        }
+      }
+      assert (it1 ==basePl.size()) || (it2 == mergedPl.size());
+      while(it1 < basePl.size()){
+        ret.add(new PostingsEntry(basePl.get(it1++)));
+      }
+      double s;
+      while(it2 < mergedPl.size()){
+        s = tfidf(mergedPl.get(it2).size(),mergedPl.size(),index.docLengths.get(mergedPl.get(it2).docID),index.docNames.get(mergedPl.get(it2)),mergedPl.get(it2).docID);
+        ret.add(new PostingsEntry(mergedPl.get(it2++).docID,s*w));
+      }
+      return ret ;
+    }
+    private double tfidf(int tf, int df,int norm, String docName,int docID){
+      System.out.println("For doc-" +docName + " : " + "tf: " + tf + ", df: " + df + ", len = " + norm + "docID: " + docID);
+      return (tf * Math.log((double)index.docLengths.size()/df))/(double)norm;
     }
 }
