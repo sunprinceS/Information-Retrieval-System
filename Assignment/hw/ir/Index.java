@@ -9,6 +9,7 @@ package ir;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  *  Defines some common data structures and methods that all types of
@@ -22,8 +23,15 @@ public interface Index {
     /** Mapping from document identifier to document length. */
     public HashMap<Integer,Integer> docLengths = new HashMap<Integer,Integer>();
 
+    public ArrayList<Double> docNorms = new ArrayList<Double>();
+    //public HashMap<Integer,Double> docNorms = new HashMap<Integer,Double>();
+    
+
+
     /** Inserts a token into the index. */
     public void insert( String token, int docID, int offset );
+
+    public void calDocNorm();
 
     /** Returns the postings for a given term. */
     public PostingsList getPostings( String token );

@@ -1,7 +1,29 @@
 import java.util.*;
 import java.io.*;
+//import org.apache.
 
 public class PageRank {
+
+    private class Pair implements Comparable<Pair>{
+      public String docName;
+      public double rank;
+
+      public Pair(String d,double r){
+        this.docName = d;
+        this.rank = r;
+      }
+
+      public int compareTo(Pair p){
+        if(this.rank == p.rank) return 0;
+        else if(this.rank < p.rank) return 1;
+        else return -1;
+      }
+
+      public void print(){
+        System.out.println(docName + ": " + rank);
+      }
+    }
+
 
     /**  
      *   Maximal number of documents. We're assuming here that we
@@ -9,11 +31,14 @@ public class PageRank {
      */
     final static int MAX_NUMBER_OF_DOCS = 1000;
 
+    public ArrayList<Pair> pagerank = new ArrayList<Pair>();
+
     /**
      *   Mapping from document names to document numbers.
      */
     Hashtable<String,Integer> docNumber = new Hashtable<String,Integer>();
 
+    //Integer[] numOutLink = new Integer[MAX_NUMBER_OF_DOCS];
     /**
      *   Mapping from document numbers to document names
      */
@@ -24,6 +49,8 @@ public class PageRank {
      *   random surfer clicks from page i to page j.
      */
     double[][] p = new double[MAX_NUMBER_OF_DOCS][MAX_NUMBER_OF_DOCS];
+
+
 
     /**
      *   The number of outlinks from each node.
@@ -53,10 +80,12 @@ public class PageRank {
 
 
     public PageRank( String filename ) {
-	int noOfDocs = readDocs( filename );
-	initiateProbabilityMatrix( noOfDocs );
-	iterate( noOfDocs, 100 );
+      int noOfDocs = readDocs( filename );
+      initiateProbabilityMatrix( noOfDocs );
+      iterate( noOfDocs, 100 );
+      
     }
+
 
 
     /* --------------------------------------------- */
@@ -71,56 +100,58 @@ public class PageRank {
      *   @return the number of documents read.
      */
     int readDocs( String filename ) {
-	int fileIndex = 0;
-	try {
-	    System.err.print( "Reading file... " );
-	    BufferedReader in = new BufferedReader( new FileReader( filename ));
-	    String line;
-	    while ((line = in.readLine()) != null && fileIndex<MAX_NUMBER_OF_DOCS ) {
-		int index = line.indexOf( ";" );
-		String title = line.substring( 0, index );
-		Integer fromdoc = docNumber.get( title );
-		//  Have we seen this document before?
-		if ( fromdoc == null ) {	
-		    // This is a previously unseen doc, so add it to the table.
-		    fromdoc = fileIndex++;
-		    docNumber.put( title, fromdoc );
-		    docName[fromdoc] = title;
-		}
-		// Check all outlinks.
-		StringTokenizer tok = new StringTokenizer( line.substring(index+1), "," );
-		while ( tok.hasMoreTokens() && fileIndex<MAX_NUMBER_OF_DOCS ) {
-		    String otherTitle = tok.nextToken();
-		    Integer otherDoc = docNumber.get( otherTitle );
-		    if ( otherDoc == null ) {
-			// This is a previousy unseen doc, so add it to the table.
-			otherDoc = fileIndex++;
-			docNumber.put( otherTitle, otherDoc );
-			docName[otherDoc] = otherTitle;
-		    }
-		    // Set the probability to LINK for now, to indicate that there is
-		    // a link from d to otherDoc.
-		    if ( p[fromdoc][otherDoc] >= 0 ) {
-			p[fromdoc][otherDoc] = LINK;
-			out[fromdoc]++;
-		    }
-		}
-	    }
-	    if ( fileIndex >= MAX_NUMBER_OF_DOCS ) {
-		System.err.print( "stopped reading since documents table is full. " );
-	    }
-	    else {
-		System.err.print( "done. " );
-	    }
-	}
-	catch ( FileNotFoundException e ) {
-	    System.err.println( "File " + filename + " not found!" );
-	}
-	catch ( IOException e ) {
-	    System.err.println( "Error reading file " + filename );
-	}
-	System.err.println( "Read " + fileIndex + " number of documents" );
-	return fileIndex;
+      int fileIndex = 0;
+      try {
+          System.err.print( "Reading file... " );
+          BufferedReader in = new BufferedReader( new FileReader( filename ));
+          String line;
+          while ((line = in.readLine()) != null && fileIndex<MAX_NUMBER_OF_DOCS ) {
+            int index = line.indexOf( ";" );
+            String title = line.substring( 0, index );
+            //System.out.println(title);
+            Integer fromdoc = docNumber.get( title );
+            //  Have we seen this document before?
+            if ( fromdoc == null ) {	
+                // This is a previously unseen doc, so add it to the table.
+                fromdoc = fileIndex++;
+                docNumber.put( title, fromdoc );
+                docName[fromdoc] = title;
+            }
+            // Check all outlinks.
+            StringTokenizer tok = new StringTokenizer( line.substring(index+1), "," );
+            while ( tok.hasMoreTokens() && fileIndex<MAX_NUMBER_OF_DOCS ) {
+                String otherTitle = tok.nextToken();
+                Integer otherDoc = docNumber.get( otherTitle );
+                if ( otherDoc == null ) {
+              // This is a previousy unseen doc, so add it to the table.
+              otherDoc = fileIndex++;
+              docNumber.put( otherTitle, otherDoc );
+              docName[otherDoc] = otherTitle;
+                }
+                // Set the probability to LINK for now, to indicate that there is
+                // a link from d to otherDoc.
+                if ( p[fromdoc][otherDoc] >= 0 ) {
+              p[fromdoc][otherDoc] = LINK;
+              out[fromdoc]++;
+              
+                }
+            }
+          }
+          if ( fileIndex >= MAX_NUMBER_OF_DOCS ) {
+        System.err.print( "stopped reading since documents table is full. " );
+          }
+          else {
+        System.err.print( "done. " );
+          }
+      }
+      catch ( FileNotFoundException e ) {
+          System.err.println( "File " + filename + " not found!" );
+      }
+      catch ( IOException e ) {
+          System.err.println( "Error reading file " + filename );
+      }
+      System.err.println( "Read " + fileIndex + " number of documents" );
+      return fileIndex;
     }
 
 
@@ -133,10 +164,25 @@ public class PageRank {
      *   Initiates the probability matrix. 
      */
     void initiateProbabilityMatrix( int numberOfDocs ) {
-
-	// YOUR CODE HERE
-	
+      for(int i=0;i<numberOfDocs;++i){
+        //System.out.println(out[i]);
+        if(out[i] != 0){
+          for(int j=0;j<numberOfDocs;++j){
+            if(p[i][j] == LINK){
+              p[i][j] = 1.0/out[i];
+            }
+            p[i][j] = (p[i][j] * (1-BORED)) + (BORED * 1.0/numberOfDocs);
+          }
+        }
+        else{
+          for(int j=0;j<numberOfDocs;++j){
+            p[i][j] = 1.0/numberOfDocs;
+          }
+        }
+      }
     }
+
+	
 
 
     /* --------------------------------------------- */
@@ -147,9 +193,33 @@ public class PageRank {
      *   aP, aP^2, aP^3... until aP^i = aP^(i+1).
      */
     void iterate( int numberOfDocs, int maxIterations ) {
-
-	// YOUR CODE HERE
-
+      int numIter = 0;
+      double[] a = new double[numberOfDocs];
+      a[0] = 1.0;
+      double[] old_a = Arrays.copyOf(a,a.length);
+      double eps;
+      while(numIter++<maxIterations){
+        old_a = Arrays.copyOf(a,a.length);
+        for(int i=0;i<numberOfDocs;++i){
+          a[i] = old_a[0] * p[0][i];
+          for(int j=1;j<numberOfDocs;++j){
+            a[i] += old_a[j] * p[j][i];
+          }
+        }
+        eps = 0;
+        for(int i=0;i<numberOfDocs;++i){
+          eps += Math.abs(old_a[i] - a[i]);
+        }
+        if(eps < EPSILON)
+          break;
+      }
+      for(int i=0;i<numberOfDocs;++i){
+        pagerank.add(new Pair(docName[i],a[i]));
+      }
+      Collections.sort(pagerank);
+      for(int i=0;i<30;++i){
+        pagerank.get(i).print();
+      }
     }
 
 

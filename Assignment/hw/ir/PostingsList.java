@@ -13,20 +13,20 @@ import java.util.Collections;
 public class PostingsList implements Comparable<PostingsList>{
     
     /** The postings list */
-    private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
+    public ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
 
 
     /** Number of postings in this list. */
     public int size() {
       return list.size();
     }
-    public void rankSort(){
-      //for(int i=0;i<size();++i){
-        //list.get(i).score /= list.get(i).norm;
-        //System.out.println(list.get(i).score);
-      //}
-      Collections.sort(list);
-    }
+    //public void rankSort(){
+      ////for(int i=0;i<size();++i){
+        ////list.get(i).score /= list.get(i).norm;
+        ////System.out.println(list.get(i).score);
+      ////}
+      //Collections.sort(list);
+    //}
 
     /** Returns the ith posting. */
     public PostingsEntry get( int i ) {

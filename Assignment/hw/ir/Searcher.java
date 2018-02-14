@@ -16,10 +16,12 @@ public class Searcher {
 
     /** The index to be searched by this Searcher. */
     Index index;
+    boolean bNormCount;
     
     /** Constructor */
     public Searcher( Index index ) {
         this.index = index;
+        bNormCount = false;
     }
 
     /**
@@ -37,11 +39,28 @@ public class Searcher {
       }
       else{
         Query q = query.copy();
-        calDocNorm();
+        if (!bNormCount){
+          index.calDocNorm();
+          bNormCount = true;
+        }
         PostingsList ret = union(q);
-        ret.rankSort();
+        if(q.queryterm.size() > 1){
+          rankSort(ret,false);
+        }
+        else{
+          rankSort(ret,false);
+        }
         return ret;
       }
+    }
+    private void rankSort(PostingsList pl,boolean bNorm){
+      if(bNorm){
+        for(PostingsEntry pe:pl.list){
+          pe.score /= Math.sqrt(Math.pow((double)index.docNorms.get(pe.docID),2));
+          //pe.score /= (double)index.docNorms.get(pe.docID);
+        }
+      }
+      Collections.sort(pl.list);
     }
 
     private PostingsList union(Query query){
@@ -51,6 +70,9 @@ public class Searcher {
         ret = index.getPostings(query.queryterm.get(++curQuery).term);
       }
       if(ret != null){
+        System.out.println(query.queryterm.get(curQuery).term);
+        System.out.println("The df: " + ret.size());
+        System.out.println("idf: " + Math.log((double)index.docLengths.size()/ret.size()));
         ret = reduce(ret,query.queryterm.get(curQuery).weight * Math.log((double)index.docLengths.size()/ret.size()));
         //ret = reduce(ret,query.queryterm.get(curQuery).weight);
         for(int i=curQuery+1;i<query.queryterm.size();++i){
@@ -193,7 +215,8 @@ public class Searcher {
       return ret ;
     }
     private double tfidf(int tf, int df,int norm, String docName,int docID){
-      System.out.println("For doc-" +docName + " : " + "tf: " + tf + ", df: " + df + ", len = " + norm + "docID: " + docID);
+      //System.out.println("For doc-" +docName + " : " + "tf =  " + tf + ",  1+ln(tf) = " + (1  + Math.log(tf)));
+      System.out.println("For doc-" +docName + " : " + "tf =  " + tf + ",  df = " + df + ", docLength = " + norm );
       return (tf * Math.log((double)index.docLengths.size()/df))/(double)norm;
     }
 }

@@ -105,6 +105,23 @@ public class PersistentHashedIndex implements Index {
      *
      *  @return The number of bytes written.
      */ 
+    public void calDocNorm(){
+      for(int i=0;i<docLengths.size();++i){
+        docNorms.add(.0);
+      }
+      System.out.println(index.size());
+      for(PostingsList pl: index.values()){
+        for(PostingsEntry pe: pl.list){
+          assert docNorms.get(pe.docID) != null;
+          System.out.println(docLengths.get(pe.docID));
+          docNorms.set(pe.docID,docNorms.get(pe.docID) + tfidf(pe.size(),pl.size(),docLengths.get(pe.docID)));
+        }
+      }
+    }
+    private double tfidf(int tf,int df,int norm){
+      return (tf* Math.log((double)docLengths.size()/df))/(double)norm;
+
+    }
     int writeData(String word, String dataString, long ptr ) {
         try {
             dataFile.seek( ptr ); 

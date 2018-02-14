@@ -38,6 +38,36 @@ public class HashedIndex implements Index {
       }
     }
 
+    //public void calDocNorm(){
+      //for(int i=0;i<docLengths.size();++i){
+        //docNorms.add(.0);
+      //}
+      //for(PostingsList pl: index.values()){
+        //for(PostingsEntry pe: pl.list){
+          //assert docNorms.get(pe.docID) != null;
+          //docNorms.set(pe.docID,docNorms.get(pe.docID) + tfidf(pe.size(),pl.size(),docLengths.get(pe.docID)));
+        //}
+      //}
+    //}
+    public void calDocNorm(){
+      for(int i=0;i<docLengths.size();++i){
+        docNorms.add(.0);
+      }
+      for(PostingsList pl: index.values()){
+        for(PostingsEntry pe:pl.list){
+          docNorms.set(pe.docID,docNorms.get(pe.docID) + Math.pow((double)pe.size(),2));
+        }
+      }
+      for(double norm: docNorms){
+        System.out.println(norm);
+        System.out.println(Math.sqrt(norm));
+      }
+    }
+    
+    private double tfidf(int tf,int df,int norm){
+      return (tf* Math.log((double)docLengths.size()/df))/(double)norm;
+
+    }
 
     /**
      *  Returns the postings for a specific term, or null
@@ -47,6 +77,7 @@ public class HashedIndex implements Index {
     // REPLACE THE STATEMENT BELOW WITH YOUR CODE
       return index.get(token);
     }
+
 
 
     /**
