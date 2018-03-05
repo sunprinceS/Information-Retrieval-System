@@ -17,6 +17,8 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
     public double score = 0;
+    public double rank_score = 0;
+    public double tfidf_score = 0;
     //public double norm = 0;
     public ArrayList<Integer> positions = new ArrayList<Integer>();
 

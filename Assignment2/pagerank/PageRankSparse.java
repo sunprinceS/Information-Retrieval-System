@@ -209,7 +209,7 @@ public class PageRankSparse {
     }
     Collections.sort(pagerank);
 
-    for (int i = 0; i < 30; ++i) {
+    for (int i = 0; i < numberOfDocs; ++i) {
       pagerank.get(i).print();
     }
 

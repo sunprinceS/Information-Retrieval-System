@@ -9,7 +9,6 @@
 // with "//" are comments.
 
 // Twenty-four seven
-\d+/\d+
 
 // ADD YOUR PATTERNS HERE
 --
@@ -20,5 +19,6 @@ https?:\/\/\S{2,300}
 \d+[-\.]\d+[-\.]\d+[-\.]\d+
 \d+[,.:-]\d+[,.:-]\d+
 \d+[\.-]\w+
+\d+/\d+
 [a-zA-Z]+[-'][a-zA-Z]+
 [a-zA-Z]\.[a-zA-Z]\.

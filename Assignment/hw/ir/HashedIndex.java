@@ -58,10 +58,10 @@ public class HashedIndex implements Index {
           docNorms.set(pe.docID,docNorms.get(pe.docID) + Math.pow((double)pe.size(),2));
         }
       }
-      for(double norm: docNorms){
-        System.out.println(norm);
-        System.out.println(Math.sqrt(norm));
-      }
+      //for(double norm: docNorms){
+        //System.out.println(norm);
+        //System.out.println(Math.sqrt(norm));
+      //}
     }
     
     private double tfidf(int tf,int df,int norm){

@@ -155,6 +155,7 @@ public class SearchGUI extends JFrame {
                 long startTime = System.currentTimeMillis();
                 synchronized ( engine.indexLock ) {
                     results = engine.searcher.search( query, queryType, rankingType ); 
+                    //System.out.println(results);
                 }
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 // Display the first few results + a button to see all results.
@@ -254,6 +255,7 @@ public class SearchGUI extends JFrame {
         int i;
         for ( i=0; i<results.size() && i<maxResultsToDisplay; i++ ) {
             String description = i + ". " + displayableFileName( engine.index.docNames.get( results.get(i).docID ));
+            System.out.println(description);
             if ( queryType == QueryType.RANKED_QUERY ) {
                 description += "   " + String.format( "%.5f", results.get(i).score );
             }
