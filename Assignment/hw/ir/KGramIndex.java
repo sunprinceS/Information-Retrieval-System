@@ -54,7 +54,24 @@ public class KGramIndex {
         // 
         // YOUR CODE HERE
         //
-        return null;
+        int it1 = 0;
+        int it2 = 0;
+
+        List<KGramPostingsEntry> ret = new ArrayList<KGramPostingsEntry>();
+        while(it1 < p1.size() && it2 < p2.size()){
+          if(p1.get(it1).tokenID == p2.get(it2).tokenID){
+            ret.add(new KGramPostingsEntry(p1.get(it1).tokenID));
+            ++it1;
+            ++it2;
+          }
+          else if(p1.get(it1).tokenID < p2.get(it2).tokenID){
+            ++it1;
+          }
+          else{
+            ++it2;
+          }
+        }
+        return ret;
     }
 
 
@@ -63,6 +80,30 @@ public class KGramIndex {
         //
         // YOUR CODE HERE
         //
+
+        if(term2id.get(token) == null){
+          int idx = generateTermID();
+          term2id.put(token,idx);
+          id2term.put(idx,token);
+
+          String tok = '^' + token + '$';
+          String tmp;
+          for(int i=0;i<tok.length()-K+1;++i){
+            tmp = tok.substring(i,i+K);
+            if(index.get(tmp) == null){
+              List<KGramPostingsEntry> kgl = new ArrayList<KGramPostingsEntry>();
+              kgl.add(new KGramPostingsEntry(idx));
+              index.put(tmp,kgl);
+            }
+            else{
+              int list_size = index.get(tmp).size();
+              if(index.get(tmp).get(list_size-1).tokenID != idx){
+                index.get(tmp).add(new KGramPostingsEntry(idx));
+              }
+            }
+          }
+        }
+
     }
 
     /** Get postings for the given k-gram */
@@ -70,7 +111,7 @@ public class KGramIndex {
         //
         // YOUR CODE HERE
         //
-        return null;
+        return index.get(kgram);
     }
 
     /** Get id of a term */
@@ -152,12 +193,12 @@ public class KGramIndex {
         } else {
             int resNum = postings.size();
             System.err.println("Found " + resNum + " posting(s)");
-            if (resNum > 10) {
-                System.err.println("The first 10 of them are:");
-                resNum = 10;
-            }
+            //if (resNum > 10) {
+                //System.err.println("The first 10 of them are:");
+                //resNum = 10;
+            //}
             for (int i = 0; i < resNum; i++) {
-                System.err.println(kgIndex.getTermByID(postings.get(i).tokenID));
+                System.out.println(kgIndex.getTermByID(postings.get(i).tokenID));
             }
         }
     }
