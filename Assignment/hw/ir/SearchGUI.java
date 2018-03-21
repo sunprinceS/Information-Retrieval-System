@@ -1,11 +1,9 @@
-/*
+/*  
  *   This file is part of the computer assignment for the
  *   Information Retrieval course at KTH.
- *
- *   First version: Johan Boye, 2012
- *   Additions: Hedvig Kjellström, 2012-14
- *   Modifications: Johan Boye, 2016
- */
+ * 
+ *   Johan Boye, Dmytro Kalpachki 2017
+ */  
 package ir;
 
 import java.awt.*;
@@ -27,17 +25,17 @@ public class SearchGUI extends JFrame {
     Engine engine;
 
     /**  The query posed by the user. */
-    private Query query;
-
+    private Query query; 
+    
     /**  The results of a search query. */
-    private PostingsList results;
+    private PostingsList results; 
 
     /**  The query type (either intersection, phrase, or ranked). */
     QueryType queryType = QueryType.INTERSECTION_QUERY;
 
     /**  The ranking type (either tf-idf, pagerank, or combination). */
     RankingType rankingType = RankingType.TF_IDF;
-
+        
     /**  Max number of results to display. */
     static final int MAX_RESULTS = 10;
 
@@ -45,7 +43,7 @@ public class SearchGUI extends JFrame {
     private static final String MARKER = "----------------------------------------------------";
 
 
-    /*
+    /*  
      *   Common GUI resources
      */
     public JCheckBox[] box = null;
@@ -59,8 +57,8 @@ public class SearchGUI extends JFrame {
     JMenuBar menuBar = new JMenuBar();
     JMenu fileMenu = new JMenu( "File" );
     JMenu optionsMenu = new JMenu( "Search options" );
-    JMenu rankingMenu = new JMenu( "Ranking score" );
-    JMenu structureMenu = new JMenu( "Text structure" );
+    JMenu rankingMenu = new JMenu( "Ranking score" ); 
+    JMenu structureMenu = new JMenu( "Text structure" ); 
     JMenuItem saveItem = new JMenuItem( "Save index and exit" );
     JMenuItem quitItem = new JMenuItem( "Quit" );
     JRadioButtonMenuItem intersectionItem = new JRadioButtonMenuItem( "Intersection query" );
@@ -71,7 +69,7 @@ public class SearchGUI extends JFrame {
     JRadioButtonMenuItem combinationItem = new JRadioButtonMenuItem( "Combination" );
     ButtonGroup queries = new ButtonGroup();
     ButtonGroup ranking = new ButtonGroup();
-
+ 
 
     /**
      *  Constructor
@@ -103,9 +101,9 @@ public class SearchGUI extends JFrame {
         optionsMenu.add( intersectionItem );
         optionsMenu.add( phraseItem );
         optionsMenu.add( rankedItem );
-        rankingMenu.add( tfidfItem );
-        rankingMenu.add( pagerankItem );
-        rankingMenu.add( combinationItem );
+        rankingMenu.add( tfidfItem ); 
+        rankingMenu.add( pagerankItem ); 
+        rankingMenu.add( combinationItem ); 
         queries.add( intersectionItem );
         queries.add( phraseItem );
         queries.add( rankedItem );
@@ -130,7 +128,7 @@ public class SearchGUI extends JFrame {
         p.add(docViewPane);
         setVisible( true );
 
-        /*
+        /*  
          *  Searches for documents matching the string in the search box, and displays
          *  the first few results.
          */
@@ -144,19 +142,21 @@ public class SearchGUI extends JFrame {
                 // Take relevance feedback from the user into account (assignment 3)
                 // Check which documents the user has marked as relevant.
                 if ( box != null ) {
+                  System.out.println(box.length);
                     boolean[] relevant = new boolean[box.length];
                     for ( int i=0; i<box.length; i++ ) {
-                        if ( box[i] != null )
+                        if ( box[i] != null ) 
                             relevant[i] = box[i].isSelected();
                     }
-                    query.relevanceFeedback( results, relevant, engine );
+                    query.relevanceFeedback( results, relevant, engine ,box.length);
                 }
                 // Search and print results. Access to the index is synchronized since
                 // we don't want to search at the same time we're indexing new files
                 // (this might corrupt the index).
                 long startTime = System.currentTimeMillis();
                 synchronized ( engine.indexLock ) {
-                    results = engine.searcher.search( query, queryType, rankingType );
+                    results = engine.searcher.search( query, queryType, rankingType ); 
+                    //System.out.println(results);
                 }
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 // Display the first few results + a button to see all results.
@@ -167,18 +167,6 @@ public class SearchGUI extends JFrame {
                     displayResults( MAX_RESULTS, elapsedTime/1000.0 );
                 } else {
                     displayInfoText( "Found 0 matching document(s)" );
-                    SpellingOptionsDialog dialog = new SpellingOptionsDialog(50);
-		    // To make this compile, you will need to add to the Engine class
-		    // an instance variable 'speller' of class SpellChecker 
-                    String[] corrections = engine.speller.check(query, 10);
-                    if (corrections != null && corrections.length > 0) {
-                        String choice = dialog.show(corrections, corrections[0]);
-                        if (choice != null) {
-                            queryWindow.setText(choice);
-                            queryWindow.grabFocus();
-                            this.actionPerformed(e);
-                        }
-                    }
                 }
             }
             };
@@ -196,21 +184,21 @@ public class SearchGUI extends JFrame {
             };
         quitItem.addActionListener( quit );
 
-
+        
         Action setIntersectionQuery = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 queryType = QueryType.INTERSECTION_QUERY;
             }
             };
         intersectionItem.addActionListener( setIntersectionQuery );
-
+        
         Action setPhraseQuery = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 queryType = QueryType.PHRASE_QUERY;
             }
             };
         phraseItem.addActionListener( setPhraseQuery );
-
+            
         Action setRankedQuery = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 queryType = QueryType.RANKED_QUERY;
@@ -224,14 +212,14 @@ public class SearchGUI extends JFrame {
             }
             };
         tfidfItem.addActionListener( setTfidfRanking );
-
+            
         Action setPagerankRanking = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 rankingType = RankingType.PAGERANK;
             }
             };
         pagerankItem.addActionListener( setPagerankRanking );
-
+            
         Action setCombinationRanking = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 rankingType = RankingType.COMBINATION;
@@ -239,7 +227,7 @@ public class SearchGUI extends JFrame {
             };
         combinationItem.addActionListener( setCombinationRanking );
 
-    }
+    } 
 
 
    /* ----------------------------------------------- */
@@ -268,6 +256,7 @@ public class SearchGUI extends JFrame {
         int i;
         for ( i=0; i<results.size() && i<maxResultsToDisplay; i++ ) {
             String description = i + ". " + displayableFileName( engine.index.docNames.get( results.get(i).docID ));
+            System.out.println(description);
             if ( queryType == QueryType.RANKED_QUERY ) {
                 description += "   " + String.format( "%.5f", results.get(i).score );
             }
@@ -277,7 +266,7 @@ public class SearchGUI extends JFrame {
             JPanel result = new JPanel();
             result.setAlignmentX(Component.LEFT_ALIGNMENT);
             result.setLayout(new BoxLayout(result, BoxLayout.X_AXIS));
-
+            
             JLabel label = new JLabel(description);
             label.setFont( resultFont );
 
@@ -286,46 +275,20 @@ public class SearchGUI extends JFrame {
                     String fileName = ((JLabel)e.getSource()).getText().split(" ")[1];
                     String contents = "Displaying contents of " + fileName + "\n" + MARKER + "\n";
                     String line;
-
-                    Queue<String> fqueue = new LinkedList<>();
-
                     for (int j = 0, sz = engine.dirNames.size(); j < sz; j++) {
-                        File curDir = new File(engine.dirNames.get(j));
-                        fqueue.offer(curDir.toString());
-
-                        String[] directories = curDir.list(new FilenameFilter() {
-                            @Override
-                            public boolean accept(File current, String name) {
-                                return new File(current, name).isDirectory();
-                            }
-                        });
-
-                        for (String dir : directories) {
-                            fqueue.offer(new File(curDir.toString(), dir).toString());
-                        }
-                    }
-
-                    boolean foundFile = false;
-                    while(!fqueue.isEmpty()) {
-                        String dirName = fqueue.poll();
-                        File file = new File(dirName, fileName);
-
+                        File file = new File(engine.dirNames.get(j), fileName);
                         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                             while ((line = br.readLine()) != null) {
                                 contents += line.trim() + "\n";
                             }
-                            foundFile = true;
-                            break;
                         } catch (FileNotFoundException exc) {
+                            contents += "\n   No file found";
                         } catch (IOException exc) {
+                            contents += "\n   IOException";
                         } catch (NullPointerException exc) {
+                            contents += "\n   NullPointerException";
                         }
                     }
-
-                    if (!foundFile) {
-                        contents += "No file found\n";
-                    }
-
                     docTextView.setText(contents);
                     docTextView.setCaretPosition(0);
                 }
@@ -370,6 +333,7 @@ public class SearchGUI extends JFrame {
         revalidate();
         repaint();
     };
+        
 
     /**
      *  Returns the filename at the end of a path.
@@ -382,4 +346,9 @@ public class SearchGUI extends JFrame {
         }
         return result;
     }
+
+  
+
+
+
 }

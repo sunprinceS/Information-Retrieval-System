@@ -45,7 +45,8 @@ public class Engine {
 
     /** For persistent indexes, we might not need to do any indexing. */
     boolean is_indexing = true;
-
+    
+    //SpellCheck speller;
 
     /* ----------------------------------------------- */
 
