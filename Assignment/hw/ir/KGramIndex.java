@@ -50,7 +50,7 @@ public class KGramIndex {
     /**
      *  Get intersection of two postings lists
      */
-    private List<KGramPostingsEntry> intersect(List<KGramPostingsEntry> p1, List<KGramPostingsEntry> p2) {
+    public List<KGramPostingsEntry> intersect(List<KGramPostingsEntry> p1, List<KGramPostingsEntry> p2) {
         // 
         // YOUR CODE HERE
         //
@@ -96,8 +96,8 @@ public class KGramIndex {
               index.put(tmp,kgl);
             }
             else{
-              int list_size = index.get(tmp).size();
-              if(index.get(tmp).get(list_size-1).tokenID != idx){
+              int last = index.get(tmp).size()-1;
+              if(index.get(tmp).get(last).tokenID != idx){
                 index.get(tmp).add(new KGramPostingsEntry(idx));
               }
             }
@@ -193,10 +193,10 @@ public class KGramIndex {
         } else {
             int resNum = postings.size();
             System.err.println("Found " + resNum + " posting(s)");
-            //if (resNum > 10) {
-                //System.err.println("The first 10 of them are:");
-                //resNum = 10;
-            //}
+            if (resNum > 10) {
+                System.err.println("The first 10 of them are:");
+                resNum = 10;
+            }
             for (int i = 0; i < resNum; i++) {
                 System.out.println(kgIndex.getTermByID(postings.get(i).tokenID));
             }

@@ -8,6 +8,10 @@
 package ir;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
+import java.lang.System;
 
 /**
  *  Searches an index for results of a query.

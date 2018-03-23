@@ -24,9 +24,11 @@ public interface Index {
     public HashMap<Integer,Integer> docLengths = new HashMap<Integer,Integer>();
 
     public ArrayList<Double> docNorms = new ArrayList<Double>();
-    //public HashMap<Integer,Double> docNorms = new HashMap<Integer,Double>();
-    
 
+    public int KGram = 2;
+
+    public KGramIndex kgIndex = new KGramIndex(KGram);
+    //public HashMap<Integer,Double> docNorms = new HashMap<Integer,Double>();
 
     /** Inserts a token into the index. */
     public void insert( String token, int docID, int offset );
@@ -36,8 +38,9 @@ public interface Index {
     /** Returns the postings for a given term. */
     public PostingsList getPostings( String token );
 
+    public PostingsList getWildcardPostings(String token,int ast_loc);
+
     /** This method is called on exit. */
     public void cleanup();
 
 }
-		    

@@ -24,6 +24,7 @@ public class Indexer {
     /** The index to be built up by this Indexer. */
     Index index;
     
+
     /** The next docID to be generated. */
     private int lastDocID = 0;
 
@@ -36,14 +37,14 @@ public class Indexer {
 
     /** Constructor */
     public Indexer( Index index, String patterns_file ) {
-	this.index = index;
-	this.patterns_file = patterns_file;
+      this.index = index;
+      this.patterns_file = patterns_file;
     }
 
 
     /** Generates a new document identifier as an integer. */
     private int generateDocID() {
-	return lastDocID++;
+      return lastDocID++;
     }
 
 
@@ -53,57 +54,57 @@ public class Indexer {
      *  all its files and subdirectories are recursively processed.
      */
     public void processFiles( File f ) {
-	// do not try to index fs that cannot be read
-	if ( f.canRead() ) {
-	    if ( f.isDirectory() ) {
-		String[] fs = f.list();
-		// an IO error could occur
-		if ( fs != null ) {
-		    for ( int i=0; i<fs.length; i++ ) {
-			processFiles( new File( f, fs[i] ));
-		    }
-		}
-	    } else {
-		// First register the document and get a docID
-		int docID = generateDocID();
-		if ( docID%1000 == 0 ) System.err.println( "Indexed " + docID + " files" );
-		index.docNames.put( docID, f.getPath() );
-		try {
-		    //  Read the first few bytes of the file to see if it is 
-		    // likely to be a PDF 
-		    Reader reader = new InputStreamReader( new FileInputStream(f), StandardCharsets.UTF_8 );
-		    char[] buf = new char[4];
-		    reader.read( buf, 0, 4 );
-		    reader.close();
-		    if ( buf[0] == '%' && buf[1]=='P' && buf[2]=='D' && buf[3]=='F' ) {
-			// We assume this is a PDF file
-			try {
-			    String contents = extractPDFContents( f );
-			    reader = new StringReader( contents );
-			}
-			catch ( IOException e ) {
-			    // Perhaps it wasn't a PDF file after all
-			    reader = new InputStreamReader( new FileInputStream(f), StandardCharsets.UTF_8 );
-			}
-		    }
-		    else {
-			// We hope this is ordinary text
-			reader = new InputStreamReader( new FileInputStream(f), StandardCharsets.UTF_8 );
-		    }
-		    Tokenizer tok = new Tokenizer( reader, true, false, true, patterns_file );
-		    int offset = 0;
-		    while ( tok.hasMoreTokens() ) {
-			String token = tok.nextToken();
-			insertIntoIndex( docID, token, offset++ );
-		    }
-		    index.docLengths.put( docID, offset );
-		    reader.close();
-		}
-		catch ( IOException e ) {
-		    System.err.println( "Warning: IOException during indexing." );
-		}
-	    }
-	}
+      // do not try to index fs that cannot be read
+      if ( f.canRead() ) {
+          if ( f.isDirectory() ) {
+        String[] fs = f.list();
+        // an IO error could occur
+        if ( fs != null ) {
+            for ( int i=0; i<fs.length; i++ ) {
+          processFiles( new File( f, fs[i] ));
+            }
+        }
+        } else {
+        // First register the document and get a docID
+        int docID = generateDocID();
+        if ( docID%1000 == 0 ) System.err.println( "Indexed " + docID + " files" );
+        index.docNames.put( docID, f.getPath() );
+        try {
+            //  Read the first few bytes of the file to see if it is 
+            // likely to be a PDF 
+            Reader reader = new InputStreamReader( new FileInputStream(f),StandardCharsets.UTF_8 );
+            char[] buf = new char[4];
+            reader.read( buf, 0, 4 );
+            reader.close();
+            if ( buf[0] == '%' && buf[1]=='P' && buf[2]=='D' && buf[3]=='F' ) {
+          // We assume this is a PDF file
+          try {
+              String contents = extractPDFContents( f );
+              reader = new StringReader( contents );
+          }
+          catch ( IOException e ) {
+              // Perhaps it wasn't a PDF file after all
+              reader = new InputStreamReader( new FileInputStream(f), StandardCharsets.UTF_8 );
+          }
+          }
+            else {
+          // We hope this is ordinary text
+          reader = new InputStreamReader( new FileInputStream(f), StandardCharsets.UTF_8 );
+            }
+            Tokenizer tok = new Tokenizer( reader, true, false, true, patterns_file );
+            int offset = 0;
+            while ( tok.hasMoreTokens() ) {
+          String token = tok.nextToken();
+          insertIntoIndex( docID, token, offset++ );
+            }
+            index.docLengths.put( docID, offset );
+            reader.close();
+        }
+        catch ( IOException e ) {
+            System.err.println( "Warning: IOException during indexing." );
+        }
+          }
+      }
     }
 
     
