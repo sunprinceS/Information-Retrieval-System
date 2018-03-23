@@ -30,12 +30,12 @@ public class HashedIndex implements Index {
       // YOUR CODE HERE
       if(index.get(token) != null){
         (index.get(token)).add(docID,offset);
-        kgIndex.insert(token);
       }
       else{
         PostingsList newPL = new PostingsList();
         newPL.add(new PostingsEntry(docID,offset));
         index.put(token,newPL);
+        kgIndex.insert(token);
       }
     }
 
@@ -112,22 +112,22 @@ public class HashedIndex implements Index {
       }
 
       //after adding all, do the position check $^
-      System.out.println("Query : " + token);
       boolean init = false;
       for(int i=0;i<candidate_words.size();++i){
         String term = kgIndex.getTermByID(candidate_words.get(i).tokenID);
-        System.out.println(term);
-        System.out.println("********");
-        if(ast_loc != 0){
-          System.out.println(token.substring(0,ast_loc));
-          System.out.println(term.substring(0,ast_loc));
-        }
-        if(ast_loc != token.length()-1){
-          System.out.println(token.substring(ast_loc+1,token.length()));
-          System.out.println(term.substring(term.length()-token.length()+ast_loc+1,term.length()));
-        }
-        System.out.println("********");
-        if(((ast_loc == 0)||(token.substring(0,ast_loc) == term.substring(0,ast_loc))) && ((ast_loc == token.length()-1)||(token.substring(ast_loc+1,token.length()) == term.substring(term.length()-token.length()+ast_loc+1,term.length())))){
+        //System.out.println(term);
+        //System.out.println("********");
+        //if(ast_loc != 0){
+          //System.out.println(token.substring(0,ast_loc));
+          //System.out.println(term.substring(0,ast_loc));
+        //}
+        //if(ast_loc != token.length()-1){
+          //System.out.println(token.substring(ast_loc+1,token.length()));
+          //System.out.println(term.substring(term.length()-token.length()+ast_loc+1,term.length()));
+        //}
+        //System.out.println("********");
+
+        if(((ast_loc == 0)||(token.substring(0,ast_loc).equals(term.substring(0,ast_loc)))) && ((ast_loc == token.length()-1)||(token.substring(ast_loc+1,token.length()).equals(term.substring(term.length()-token.length()+ast_loc+1,term.length()))))){
           if(init){
             ret = mergeList(ret,index.get(term));
           }
@@ -135,6 +135,11 @@ public class HashedIndex implements Index {
             ret = index.get(term);
             init = true;
           }
+          //System.out.println(term);
+          //for(int ii=0;ii<ret.size();++ii){
+            //System.out.print( docNames.get(ret.get(ii).docID) + " ");
+          //}
+          //System.out.println("");
         }
       }
       return ret;
