@@ -1,0 +1,84 @@
+https://hackmd.io/s/SyK-ZVlcz
+
+DD2476 - Assignment3
+===
+
+## Task 3.1
+
+### Experiment
+* zombie attack (To me: I assume this is sth like running event dressed like zombie)
+![](https://i.imgur.com/CI2CaL3.png)
+![](https://i.imgur.com/lFU97lf.png)
+![](https://i.imgur.com/3Gkjg54.png)
+
+* money transfer (Actually, I don't think any of them related to "money transfer", so I just chose the most general documents related to transfer students)
+![](https://i.imgur.com/B8lfr3W.png)
+![](https://i.imgur.com/1Mctdaz.png)
+![](https://i.imgur.com/nDD5LA2.png)
+
+
+* outstanding scholarship applicant (We have to not to choose the words like academic, student, club...)
+-> this is not a good query actually
+![](https://i.imgur.com/IYS6dOs.png)
+![](https://i.imgur.com/WomrKee.png)
+![](https://i.imgur.com/UWNu6qh.png)
+
+### Question:
+
+> What happens to the two documents that you selected?
+
+In general, their ranking will improve (but not always, because it might introduce some really short documents with only certain word matching)
+
+> What are the characteristics of the other documents in the new top ten list - what are they about? Are there any new ones that were not among the top ten before?
+
+In theory, they will be more like the relevant documents selected. However, the so-called "relevant" uses cosine similarity to calculate, so there might be some short documents appear in the top-10 list. (Depend on how we define "relevant")
+So the second answer is YES.
+
+> How is the relevance feedback process affected by α and β?
+
+α higher means that we trust inital query more (the ranking will be more unchanged), vice versa.
+
+> Why is the search after feedback slower? Why is the number of returned documents larger? 
+
+Because the new query term contain more words
+
+> Why is relevance feedback called a **local** query refining method? 
+
+The result will depend on the initial query and the relavant documents user choose after.
+
+> What are other alternatives to relevance feedback for query refining?
+
+Query expansion (use syn to expand the term in query)
+
+## Task3.2
+
+1. Search the query **graduate program mathematics** (the ground truth will be the result in task2.4 I did)
+2. Let user select relevant documents, and run relevance feedback
+3. Check the whole precision-recall curve and precision at 10 to see the improvement
+
+## Task3.3
+I don't want to print to the console, it's too messy. Just see Task3.4
+
+## Task3.4
+
+> How would you interpret the meaning of the query "historic\* humo\*r"
+historical humour
+
+> Why the word "revenge" be returned by a bigram index in return to query "re\*ve"?
+> And How to solve that?
+
+Because the query will search '^r','re','ve','e$', and 'revenge' is end with 'e', so it will be selected.
+Since we only have 1 asterick, so we need to check the substring before and after that separately, in the above case, we need to make sure the word is start in 're' and end with 've'.
+
+> How would yo get the ranking for the ranked wildcard queries?
+I viewed the wildcard queryterm as a special term with hight term frequency (because it matches many words) and high document frequency, and do the same thing as previous tasks did.
+
+* mo\*y transfer
+![](https://i.imgur.com/CLFpr42.png)
+
+
+* b\* colo\*r
+![](https://i.imgur.com/tZKL03q.png)
+
+* having \*n
+![](https://i.imgur.com/gWJZhfJ.png)

@@ -73,10 +73,12 @@ public class HashedIndex implements Index {
     public PostingsList getPostings( String token ) {
     // REPLACE THE STATEMENT BELOW WITH YOUR CODE
     // if token contains * or not found -> need token expansion!
+      System.out.println("The token is " + token);
       int ast_loc = token.indexOf('*');
       if(ast_loc != -1){ // wildcard query
         return getWildcardPostings(token,ast_loc);
       }
+      System.out.println("Document freq is " + index.get(token).size());
       return index.get(token);
     }
     //abc*
@@ -107,25 +109,14 @@ public class HashedIndex implements Index {
       else{
         candidate_words = kgIndex.intersect(p_wild(token.substring(0,ast_loc)),b_wild(token.substring(ast_loc+1,token.length())));
       }
-      for(int i=0;i<candidate_words.size();++i){
-        System.out.println(kgIndex.getTermByID(candidate_words.get(i).tokenID));
-      }
+      //for(int i=0;i<candidate_words.size();++i){
+        //System.out.println(kgIndex.getTermByID(candidate_words.get(i).tokenID));
+      //}
 
       //after adding all, do the position check $^
       boolean init = false;
       for(int i=0;i<candidate_words.size();++i){
         String term = kgIndex.getTermByID(candidate_words.get(i).tokenID);
-        //System.out.println(term);
-        //System.out.println("********");
-        //if(ast_loc != 0){
-          //System.out.println(token.substring(0,ast_loc));
-          //System.out.println(term.substring(0,ast_loc));
-        //}
-        //if(ast_loc != token.length()-1){
-          //System.out.println(token.substring(ast_loc+1,token.length()));
-          //System.out.println(term.substring(term.length()-token.length()+ast_loc+1,term.length()));
-        //}
-        //System.out.println("********");
 
         if(((ast_loc == 0)||(token.substring(0,ast_loc).equals(term.substring(0,ast_loc)))) && ((ast_loc == token.length()-1)||(token.substring(ast_loc+1,token.length()).equals(term.substring(term.length()-token.length()+ast_loc+1,term.length()))))){
           if(init){
@@ -135,13 +126,9 @@ public class HashedIndex implements Index {
             ret = index.get(term);
             init = true;
           }
-          //System.out.println(term);
-          //for(int ii=0;ii<ret.size();++ii){
-            //System.out.print( docNames.get(ret.get(ii).docID) + " ");
-          //}
-          //System.out.println("");
         }
       }
+      System.out.println("Document freq. is " + ret.size());
       return ret;
     }
 
@@ -179,7 +166,7 @@ public class HashedIndex implements Index {
       assert pe1.docID == pe2.docID;
       int it1 = 0;
       int it2 = 0;
-      PostingsEntry ret = new PostingsEntry(pe1.docID,1.0);
+      PostingsEntry ret = new PostingsEntry(pe1.docID);
       while(it1 < pe1.size() && it2 < pe2.size()){
         if(pe1.get(it1) == pe2.get(it2)){
           ret.add(pe2.get(it2));

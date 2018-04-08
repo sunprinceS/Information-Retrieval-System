@@ -20,13 +20,6 @@ public class PostingsList implements Comparable<PostingsList>{
     public int size() {
       return list.size();
     }
-    //public void rankSort(){
-      ////for(int i=0;i<size();++i){
-        ////list.get(i).score /= list.get(i).norm;
-        ////System.out.println(list.get(i).score);
-      ////}
-      //Collections.sort(list);
-    //}
 
     /** Returns the ith posting. */
     public PostingsEntry get( int i ) {

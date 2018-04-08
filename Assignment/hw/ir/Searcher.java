@@ -33,7 +33,6 @@ public class Searcher {
      *  @return A postings list representing the result of the query.
      */
     public PostingsList search( Query query, QueryType queryType, RankingType rankingType ) { 
-      //System.out.println("Total number of document: " + index.docLengths.size());
       //  REPLACE THE STATEMENT BELOW WITH YOUR CODE
       if(queryType == QueryType.INTERSECTION_QUERY){
         return intersect(query,false);
@@ -75,16 +74,11 @@ public class Searcher {
         ret = index.getPostings(query.queryterm.get(++curQuery).term);
       }
       if(ret != null){
-        //System.out.println(query.queryterm.get(curQuery).term);
-        //System.out.println("The df: " + ret.size());
-        //System.out.println("idf: " + Math.log((double)index.docLengths.size()/ret.size()));
         ret = reduce(ret,query.queryterm.get(curQuery).weight * Math.log((double)index.docLengths.size()/ret.size()));
-        //ret = reduce(ret,query.queryterm.get(curQuery).weight);
         for(int i=curQuery+1;i<query.queryterm.size();++i){
           PostingsList merged = index.getPostings(query.queryterm.get(i).term);
           if(merged != null){
             ret = merge(ret,merged,query.queryterm.get(i).weight * Math.log((double)index.docLengths.size()/merged.size()));
-            //ret = merge(ret,merged,query.queryterm.get(i).weight);
           }
         }
         return ret;
@@ -220,8 +214,6 @@ public class Searcher {
       return ret ;
     }
     private double tfidf(int tf, int df,int norm, String docName,int docID){
-      //System.out.println("For doc-" +docName + " : " + "tf =  " + tf + ",  1+ln(tf) = " + (1  + Math.log(tf)));
-      //System.out.println("For doc-" +docName + " : " + "tf =  " + tf + ",  df = " + df + ", docLength = " + norm );
       return (tf * Math.log((double)index.docLengths.size()/df))/(double)norm;
     }
 }

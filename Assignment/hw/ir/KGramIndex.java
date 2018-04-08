@@ -97,7 +97,7 @@ public class KGramIndex {
             }
             else{
               int last = index.get(tmp).size()-1;
-              if(index.get(tmp).get(last).tokenID != idx){
+              if(index.get(tmp).get(last).tokenID != idx){ //avoid such words like nana
                 index.get(tmp).add(new KGramPostingsEntry(idx));
               }
             }
@@ -193,10 +193,10 @@ public class KGramIndex {
         } else {
             int resNum = postings.size();
             System.err.println("Found " + resNum + " posting(s)");
-            if (resNum > 10) {
-                System.err.println("The first 10 of them are:");
-                resNum = 10;
-            }
+            //if (resNum > 10) {
+                //System.err.println("The first 10 of them are:");
+                //resNum = 10;
+            //}
             for (int i = 0; i < resNum; i++) {
                 System.out.println(kgIndex.getTermByID(postings.get(i).tokenID));
             }

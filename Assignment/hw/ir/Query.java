@@ -166,7 +166,7 @@ public class Query {
           d_r.add(results.get(i).docID);
         }
       }
-      if(d_r.size() == 0) return; // no r.v
+      if(d_r.size() == 0) return; // no relevant docs
       
       //assume the query word is unique
       Map<String,Double> qm = new HashMap<>();
@@ -186,8 +186,11 @@ public class Query {
 
           while(tok.hasMoreTokens()){
             String token = tok.nextToken();
+            // let the tf be 1 here, since if the term occur multiple times, it
+            // will be added multiple times as well
             double v = _beta * Math.log((double)engine.index.docLengths.size()/engine.index.getPostings(token).size()) / doc_len;
-            if(qm.get(token) != null){
+
+            if(qm.get(token) != null){ // only insert unexist token
               qm.put(token,qm.get(token) + v);
             }
             else{
@@ -211,8 +214,8 @@ public class Query {
       System.out.println("Top 20 weighted token");
       for(Map.Entry<String,Double> entry: sorted.entrySet()){
         cnt += 1;
-        System.out.println(entry.getKey() + " : " + entry.getValue());
         queryterm.add(new QueryTerm(entry.getKey(),entry.getValue()));
+        System.out.println(entry.getKey() + " : " + entry.getValue());
         if(cnt == 20) break;
       }
     }
